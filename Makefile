@@ -1,11 +1,16 @@
 
+# Build outputs under build/ mirroring the source tree
+BUILD_DIR := build
+SOURCES   := $(shell find . -type f -name '*.S')
+TARGETS   := $(patsubst ./%.S,$(BUILD_DIR)/%,$(SOURCES))
 
-%: %.S
+.PHONY: all
+all: $(TARGETS)
+
+# Rule: build build/<path>/<name> from ./<path>/<name>.S
+$(BUILD_DIR)/%: ./%.S
+	@mkdir -p $(dir $@)
 	arm-linux-gnueabihf-gcc -nostdlib -nostartfiles -static -o $@ $<
-.PHONY: clean
 
 clean:
-	find . -type f -name '*.S' -exec sh -c 'for f; do b=$${f%.S}; [ -e "$$b" ] && rm -f "$$b"; done' _ {} +
-
-clean-verbose:
-	find . -type f -name '*.S' -exec sh -c 'set -x; for f; do b=$${f%.S}; [ -e "$$b" ] && rm -f "$$b"; done' _ {} +
+	rm -rf $(BUILD_DIR)
